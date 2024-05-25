@@ -4,10 +4,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 /**
  * Hello world!
@@ -15,62 +15,62 @@ import java.util.Scanner;
  */
 public class App 
 {
-    public static void main( String[] args ) throws SQLException 
+	public static void main( String[] args ) throws SQLException 
     {
     	
-    	Scanner sc = new Scanner(System.in);
-    	System.out.println("enter the id :: ");
-    	int id = sc.nextInt();
+    	String sql = "select name,id,points from restapidemo where id in (' ')";
     	
-    	List<List<Object>> totalData = new ArrayList<>(); 
-    	
-        String sql = "select name,id,points from restapidemo where id = ?";
-        
-        String url = "jdbc:postgresql://localhost:5432/RestAPI";
-        String username = "postgres";
-        String password = "0000";
-        
-        Connection con = null;
-        try {
-         con = DriverManager.getConnection(url, username, password);
-        	
-        	//Statement st = con.createStatement();
-        	
-         	PreparedStatement prepSt = con.prepareStatement(sql);
-        	prepSt.setInt(1, id);
-        	
-        	ResultSet rs = prepSt.executeQuery();
-        	
-        	if (rs.next()) {
-        	    //String name = rs.getString(1);
-        	    System.out.println("Inside if ");
-        	    List<Object> firstRowdata = new ArrayList<>();
-        	    firstRowdata.add(rs.getString("name"));
-        	    firstRowdata.add(rs.getString("id"));
-        	    firstRowdata.add(rs.getString("points"));
-    			totalData.add(firstRowdata);
-    			
-    			if(rs.next()) {
-    				while(rs.next()) {
-    					List<Object> data = new ArrayList<>();
-            			System.out.println("Inside while ");
-            			data.add(rs.getString("name"));
-            			data.add(rs.getString("id"));
-            			data.add(rs.getString("points"));
-            			totalData.add(data);
-            		}
-    			}
-        	} else {
-        	    System.out.println("No data found for id: " + id);
-        	}
-        	
-        	System.out.println(totalData);
-        	
-        } catch (Exception e) {
-        	e.printStackTrace();
-        } finally {
-        	con.close();
+    	List<List<Object>> list = new ArrayList<List<Object>>();
+    	try {
+    		System.out.println(getDataFromDB(sql));
+		} catch (Exception e) {
+			System.out.println("Exception : "+e);
 		}
+    	
         
     }
+    
+    public static List<List<Object>> getDataFromDB(String sql) throws Exception{
+    	
+    	String url = "jdbc:postgresql://localhost:5432/RestAPI";
+		String username = "postgres";
+		String password = "0000";
+		Connection con = null;
+
+		List<List<Object>> total = new ArrayList<>();
+		
+		try {
+			con = DriverManager.getConnection(url, username, password);
+			
+			PreparedStatement st = con.prepareStatement(sql);			
+			ResultSet rs = st.executeQuery();
+			
+			ResultSetMetaData rsMeta = rs.getMetaData();
+			int Columncount = rsMeta.getColumnCount();
+			
+			if(rs.next()) {
+				List<Object> firstrow = new ArrayList<Object>();
+				for(int i=1; i<=Columncount; i++) {
+					firstrow.add(rs.getString(i));
+				}
+				total.add(firstrow);
+				
+				while(rs.next()) {
+					List<Object> remainingrow = new ArrayList<Object>();
+					for(int i=1; i<=Columncount; i++) {
+						remainingrow.add(rs.getString(i));
+					}
+					total.add(remainingrow);
+				}
+			} 
+			
+		} catch (Exception e) {
+			throw e;
+			//return total;
+		} finally {
+			con.close();
+		}
+		
+    	return total;
+    }	
 }
