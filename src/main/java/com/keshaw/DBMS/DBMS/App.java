@@ -13,24 +13,26 @@ import java.util.List;
  * Hello world!
  *
  */
+
 public class App 
 {
 	public static void main( String[] args ) throws SQLException 
     {
-    	
-    	String sql = "select name,id,points from restapidemo where id in (' ')";
+    	int i=0;
+    	String sql = "select name,id,points from restapidemo where id in ('101')";
     	
     	List<List<Object>> list = new ArrayList<List<Object>>();
     	try {
     		System.out.println(getDataFromDB(sql));
 		} catch (Exception e) {
-			System.out.println("Exception : "+e);
+			System.out.println("Exception : "+ e);
 		}
-    	
         
     }
     
     public static List<List<Object>> getDataFromDB(String sql) throws Exception{
+    	
+    	String str = "";
     	
     	String url = "jdbc:postgresql://localhost:5432/RestAPI";
 		String username = "postgres";
